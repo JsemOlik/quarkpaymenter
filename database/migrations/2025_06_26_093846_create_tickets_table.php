@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('subject');
             $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
             $table->enum('category', ['technical', 'gameplay', 'player_report', 'other'])->default('technical');
-            $table->enum('status', ['open', 'in_progress', 'resolved',])->default('open');
+            $table->enum('status', ['open', 'in_progress', 'resolved'])->default('open');
             $table->timestamps();
         });
     }

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 class PterodactylService
 {
     protected $baseUrl;
+
     protected $apiKey;
 
     public function __construct()
@@ -28,6 +29,7 @@ class PterodactylService
     {
         $response = $this->apiRequest('get', '/servers?include=node');
         $servers = $response->json('data') ?? [];
+
         // Map to only needed fields
         return array_map(function ($server) {
             return [
@@ -46,4 +48,4 @@ class PterodactylService
         // For now, just return null
         return null;
     }
-} 
+}

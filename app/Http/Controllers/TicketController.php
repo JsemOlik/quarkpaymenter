@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TicketMessage;
 use App\Models\Ticket;
 use App\Models\User;
-use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class TicketController extends Controller
 {
@@ -71,6 +70,7 @@ class TicketController extends Controller
         $messages = $ticket->messages->map(function ($msg) {
             $user = \App\Models\User::find($msg->user_id);
             $isAdmin = $user && $user->role === 'admin';
+
             return [
                 'id' => $msg->id,
                 'content' => $msg->message,
@@ -83,11 +83,12 @@ class TicketController extends Controller
         // Format participants for the frontend
         $participants = $ticket->participants->map(function ($participant) {
             $user = User::find($participant->user_id);
+
             return [
                 'user_id' => $participant->user_id,
                 'username' => $user ? $user->name : null,
                 'role' => $participant->role,
-                'avatarUrl' => $user ? ("https://mc-heads.net/avatar/" . urlencode($user->name) . "/40") : null,
+                'avatarUrl' => $user ? ('https://mc-heads.net/avatar/' . urlencode($user->name) . '/40') : null,
             ];
         });
         // Ensure owner is always present in participants
@@ -98,7 +99,7 @@ class TicketController extends Controller
                 'user_id' => $ownerUserId,
                 'username' => $ownerUser ? $ownerUser->name : null,
                 'role' => 'owner',
-                'avatarUrl' => $ownerUser ? ("https://mc-heads.net/avatar/" . urlencode($ownerUser->name) . "/40") : null,
+                'avatarUrl' => $ownerUser ? ('https://mc-heads.net/avatar/' . urlencode($ownerUser->name) . '/40') : null,
             ]);
         }
 
@@ -119,7 +120,7 @@ class TicketController extends Controller
                 'user_id' => $ticket->owner?->user_id,
                 'username' => $ticket->owner ? (\App\Models\User::find($ticket->owner->user_id)->name ?? null) : null,
                 'ticketCount' => $userTicketCount,
-                'avatarUrl' => $ticket->owner ? ("https://mc-heads.net/avatar/" . urlencode(\App\Models\User::find($ticket->owner->user_id)->name ?? '') . "/40") : null,
+                'avatarUrl' => $ticket->owner ? ('https://mc-heads.net/avatar/' . urlencode(\App\Models\User::find($ticket->owner->user_id)->name ?? '') . '/40') : null,
             ],
             'canManageParticipants' => $user->role === 'admin' || ($ticket->owner && $ticket->owner->user_id === $user->id),
             'currentUserRole' => $user->role,
@@ -148,6 +149,7 @@ class TicketController extends Controller
 
         $user = \App\Models\User::find($msg->user_id);
         $isAdmin = $user && $user->role === 'admin';
+
         return response()->json([
             'id' => $msg->id,
             'content' => $msg->message,
@@ -180,15 +182,16 @@ class TicketController extends Controller
         // Determine owner ID
         $inputUsername = $request->input('user');
         $foundUser = null;
-        $ownerId = $user->role === 'admin' ? (function() use ($inputUsername, &$foundUser) {
+        $ownerId = $user->role === 'admin' ? (function () use ($inputUsername, &$foundUser) {
             if (filter_var($inputUsername, FILTER_VALIDATE_EMAIL)) {
                 $foundUser = \App\Models\User::where('email', $inputUsername)->first();
             } else {
                 $foundUser = \App\Models\User::where('name', $inputUsername)->first();
             }
+
             return $foundUser ? $foundUser->id : null;
         })() : $user->id;
-        
+
         \Log::info('Admin ticket creation debug', [
             'inputUsername' => $inputUsername,
             'foundUser' => $foundUser,
@@ -255,6 +258,7 @@ class TicketController extends Controller
         } else {
             Ticket::whereIn('id', $ids)->update(['status' => 'resolved']);
         }
+
         return response()->json(['success' => true]);
     }
 
@@ -268,6 +272,7 @@ class TicketController extends Controller
         } else {
             Ticket::whereIn('id', $ids)->delete();
         }
+
         return response()->json(['success' => true]);
     }
 
@@ -294,9 +299,11 @@ class TicketController extends Controller
                     'updated_at' => now(),
                 ]);
             }
+
             return response()->json(['status' => $ticket->status]);
         } catch (\Exception $e) {
             \Log::error('updateStatus error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -311,6 +318,7 @@ class TicketController extends Controller
         $request->validate(['priority' => 'required|in:low,medium,high,urgent']);
         $ticket->priority = $request->priority;
         $ticket->save();
+
         return response()->json(['priority' => $ticket->priority]);
     }
 
@@ -347,12 +355,12 @@ class TicketController extends Controller
     {
         $user = auth()->user();
         $ticket = Ticket::findOrFail($id);
-    
+
         // Only admin or ticket owner can remove participants
         if ($user->role !== 'admin' && $ticket->owner->user_id !== $user->id) {
             abort(403, 'Unauthorized');
         }
-    
+
         // Accept either user_id or username
         if ($request->has('username')) {
             $participantUser = \App\Models\User::where('name', $request->username)->first();
@@ -361,13 +369,13 @@ class TicketController extends Controller
             }
             $request->merge(['user_id' => $participantUser->id]);
         }
-    
+
         $request->validate([
             'user_id' => 'required|integer|exists:users,id',
         ]);
-    
+
         $ticket->removeParticipant($request->user_id);
-    
+
         // Return JSON for AJAX requests
         return response()->json(['success' => true]);
     }
@@ -402,6 +410,7 @@ class TicketController extends Controller
             abort(403, 'Unauthorized');
         }
         $ticket->delete();
+
         return response()->json(['success' => true]);
     }
 }
