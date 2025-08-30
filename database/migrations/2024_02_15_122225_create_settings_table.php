@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->text('key');
+            $table->string('key', 191); // or 255
             $table->text('value')->nullable();
             $table->string('type')->default('string');
             $table->boolean('encrypted')->default(false);
             $table->nullableMorphs('settingable');
-            $table->unique(['key', 'settingable_id', 'settingable_type']);
+            // $table->unique(['key', 'settingable_id', 'settingable_type']);
+            $table->unique([DB::raw('`key`(191)'), 'settingable_id', 'settingable_type'], 'settings_key_settingable_id_settingable_type_unique');
             $table->timestamps();
         });
     }

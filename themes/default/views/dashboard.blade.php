@@ -56,6 +56,16 @@
                     {{ __('dashboard.view_all') }}
                     <x-ri-arrow-right-fill class="size-5 h-5" />
                 </x-navigation.link>
+                <x-navigation.link class="bg-background-secondary hover:bg-background-secondary/80 border border-neutral flex items-center justify-center rounded-lg"
+                    :href="route('tickets')">
+                    {{ __('dashboard.view_all') }}
+                    <x-ri-arrow-right-fill class="size-5 h-5" />
+                </x-navigation.link>
+                <x-navigation.link class="bg-background-secondary hover:bg-background-secondary/80 border border-neutral flex items-center justify-center rounded-lg"
+                    :href="route('tickets')">
+                    {{ __('dashboard.view_all') }}
+                    <x-ri-arrow-right-fill class="size-5 h-5" />
+                </x-navigation.link>
             </div>
             @endif
         </div>
